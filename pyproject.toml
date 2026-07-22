@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mdtoolkit"
+version = "0.1.0"
+description = "一个 Markdown 命令行工具箱:目录生成、链接检查、格式化、导出。"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "mdtoolkit team" }]
+keywords = ["markdown", "cli", "toc", "linkcheck", "formatter"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Environment :: Console",
+    "Topic :: Text Processing :: Markup :: Markdown",
+]
+
+[project.urls]
+Homepage = "https://github.com/sudoyyb/mdtoolkit"
+Issues = "https://github.com/sudoyyb/mdtoolkit/issues"
+
+[project.scripts]
+mdkit = "mdtoolkit.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "pytest-cov"]
+
+[tool.setuptools.packages.find]
+include = ["mdtoolkit*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

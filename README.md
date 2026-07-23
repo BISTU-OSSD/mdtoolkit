@@ -15,7 +15,7 @@ pip install mdtoolkit
 开发安装:
 
 ```bash
-git clone https://github.com/sudoyyb/mdtoolkit.git
+git clone https://github.com/BISTU-OSSD/mdtoolkit.git
 cd mdtoolkit
 pip install -e ".[dev]"
 ```

@@ -19,8 +19,8 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/sudoyyb/mdtoolkit"
-Issues = "https://github.com/sudoyyb/mdtoolkit/issues"
+Homepage = "https://github.com/BISTU-OSSD/mdtoolkit"
+Issues = "https://github.com/BISTU-OSSD/mdtoolkit/issues"
 
 [project.scripts]
 mdkit = "mdtoolkit.cli:main"

@@ -5,7 +5,7 @@ from pathlib import Path
 _HEADING = re.compile(r"^(#{1,6})\s+(.*)$")
 _ULIST = re.compile(r"^\s*[-*+]\s+(.*)$")
 _FENCE = re.compile(r"^\s*(```|~~~)")
-_LINK = re.compile(r"$$([^$$]+)\]$([^)]+)$")
+_LINK = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 _CODE = re.compile(r"`([^`]+)`")
 
 _TEMPLATE = """<!DOCTYPE html>
@@ -23,7 +23,7 @@ _TEMPLATE = """<!DOCTYPE html>
 
 def inline(text):
     text = html.escape(text)
-    text = _LINK.sub(r'<a href=" ">\1</a >', text)
+    text = _LINK.sub(r'<a href="\2">\1</a>', text)
     text = _CODE.sub(r"<code>\1</code>", text)
     return text
 
@@ -56,7 +56,7 @@ def md_to_html(text):
             out.append("</ul>"); in_list = False
         if line.strip() == "":
             continue
-        out.append(f"<p>{inline(line)}</p >")
+        out.append(f"<p>{inline(line)}</p>")
     if in_list:
         out.append("</ul>")
     return "\n".join(out)

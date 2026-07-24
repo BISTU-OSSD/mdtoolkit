@@ -27,6 +27,7 @@ mdkit = "mdtoolkit.cli:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=7", "pytest-cov"]
+web = ["flask>=3"]
 
 [tool.setuptools.packages.find]
 include = ["mdtoolkit*"]

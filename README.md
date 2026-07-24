@@ -41,6 +41,20 @@ mdkit export post.md -o post.html   # 导出 HTML
 
 `toc` 会在 `<!-- mdkit:toc:begin -->` / `<!-- mdkit:toc:end -->` 标记之间插入或更新目录;文件中没有标记时插入到文首。
 
+## 网页版在线体验
+
+`docs/index.html` 是一个落地页,内置"在线体验"区,可以直接在浏览器里试用四个功能。它有两种运行模式:
+
+- **纯前端模式**:直接双击打开 `docs/index.html` 即可,目录/排版/导出的逻辑用 JavaScript 复现,与 Python 模块一致。适合静态托管(如 GitHub Pages)。
+- **真实后端模式**:启动本地服务后,网页会自动检测并改为调用 mdtoolkit 包里真实的 Python 代码(链接检测也会做真实 HTTP 探测):
+
+  ```bash
+  pip install -e ".[web]"
+  python web_api.py            # 监听 http://127.0.0.1:5000
+  ```
+
+  然后打开 `docs/index.html`,体验区顶部状态点变绿即表示已连上真实后端。
+
 ## 开发与贡献
 
 本项目采用 Issue 拆分任务、Pull Request 提交贡献、成员互相 Review 的协作方式。

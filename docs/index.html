@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>mdtoolkit — 一键搞定所有Markdown文档</title>
+  <style>
+    :root {
+      --main-blue: #2563eb;
+      --light-blue: #eff6ff;
+      --dark-blue: #1e40af;
+      --green: #10b981;
+      --yellow: #f59e0b;
+      --gray: #64748b;
+      --shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
+      line-height: 1.7;
+    }
+    /* 顶部导航 */
+    nav {
+      position: fixed; width: 100%; top: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 999;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    .logo { font-size: 1.5rem; font-weight: 700; color: var(--main-blue); }
+    .nav-actions a {
+      margin-left: 1.5rem; text-decoration: none;
+      color: var(--gray); font-weight: 500; transition: color 0.3s;
+    }
+    .nav-actions a.primary-btn {
+      background: var(--main-blue); color: white;
+      padding: 0.6rem 1.2rem; border-radius: 8px;
+    }
+    .nav-actions a:hover { color: var(--main-blue); }
+    /* 首屏 Hero 区 */
+    .hero {
+      margin-top: 80px; padding: 5rem 2rem; text-align: center;
+      background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: #1e293b; margin-bottom: 1.5rem; line-height: 1.2;
+    }
+    .hero p {
+      font-size: 1.25rem; max-width: 700px;
+      margin: 0 auto 2rem; color: var(--gray);
+    }
+    .hero-btn-group {
+      display: flex; gap: 1rem; justify-content: center;
+      flex-wrap: wrap; margin-top: 2rem;
+    }
+    .big-btn {
+      padding: 1rem 2rem; border-radius: 50px;
+      font-size: 1.1rem; font-weight: 600; text-decoration: none;
+      border: none; cursor: pointer; transition: all 0.3s;
+    }
+    .btn-blue { background: var(--main-blue); color: white; }
+    .btn-blue:hover {
+      background: var(--dark-blue); transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.3);
+    }
+    .btn-white {
+      background: white; color: var(--main-blue);
+      border: 2px solid var(--main-blue);
+    }
+    .btn-white:hover { background: var(--light-blue); transform: translateY(-2px); }
+    /* 通用区块样式 */
+    section { max-width: 1200px; margin: 5rem auto; padding: 0 1.5rem; }
+    .section-title {
+      text-align: center; font-size: 2.2rem; margin-bottom: 3rem;
+      color: #1e293b; position: relative;
+    }
+    .section-title:after {
+      content: ""; position: absolute; bottom: -10px; left: 50%;
+      transform: translateX(-50%); width: 60px; height: 4px;
+      background: var(--main-blue); border-radius: 2px;
+    }
+    /* 痛点场景卡片 */
+    .pain-points {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+    .pain-card {
+      background: white; padding: 2rem; border-radius: var(--radius);
+      box-shadow: var(--shadow); border-left: 5px solid #ef4444;
+      transition: transform 0.3s;
+    }
+    .pain-card:hover { transform: translateY(-5px); }
+    .pain-card h3 { color: #ef4444; margin-bottom: 1rem; font-size: 1.2rem; }
+    .pain-card p { color: var(--gray); }
+    /* 核心能力卡片 */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2rem;
+    }
+    .feature-card {
+      background: white; padding: 2.5rem 2rem; border-radius: var(--radius);
+      box-shadow: var(--shadow); text-align: center; transition: all 0.3s;
+    }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 50px rgba(37, 99, 235, 0.12);
+    }
+    .feature-icon {
+      width: 70px; height: 70px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: white; margin: 0 auto 1.5rem;
+    }
+    .feature-card:nth-child(1) .feature-icon { background: var(--main-blue); }
+    .feature-card:nth-child(2) .feature-icon { background: var(--green); }
+    .feature-card:nth-child(3) .feature-icon { background: var(--yellow); }
+    .feature-card:nth-child(4) .feature-icon { background: #8b5cf6; }
+    .feature-card h3 { font-size: 1.3rem; margin-bottom: 1rem; }
+    .feature-card p { color: var(--gray); }
+    /* 在线体验区 */
+    .demo-container {
+      background: white; padding: 2.5rem;
+      border-radius: var(--radius); box-shadow: var(--shadow);
+    }
+    .demo-row { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .demo-box textarea {
+      width: 100%; min-height: 260px; padding: 1rem;
+      border: 2px solid #e2e8f0; border-radius: 8px;
+      font-family: "Consolas", "Monaco", monospace; font-size: 0.95rem;
+      resize: vertical; line-height: 1.6;
+    }
+    .demo-output-box {
+      background: var(--light-blue); padding: 1rem; border-radius: 8px;
+      min-height: 260px; max-height: 420px; overflow: auto;
+    }
+    .demo-output-box pre {
+      white-space: pre-wrap; word-break: break-word;
+      font-family: "Consolas", "Monaco", monospace; font-size: 0.95rem;
+      margin: 0;
+    }
+    .demo-buttons { display: flex; gap: 1rem; margin: 1.5rem 0 0.5rem; flex-wrap: wrap; }
+    .demo-btn {
+      padding: 0.8rem 1.5rem; background: var(--main-blue); color: white;
+      border: none; border-radius: 8px; font-weight: 600;
+      cursor: pointer; transition: 0.3s;
+    }
+    .demo-btn:hover { background: var(--dark-blue); }
+    .demo-status {
+      margin-top: 1rem; font-size: 0.9rem; color: var(--gray);
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--gray); }
+    .status-dot.online { background: var(--green); }
+    .status-dot.offline { background: var(--yellow); }
+    /* 使用步骤 */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+    }
+    .step-card {
+      text-align: center; padding: 2rem; background: white;
+      border-radius: var(--radius); box-shadow: var(--shadow); position: relative;
+    }
+    .step-number {
+      width: 50px; height: 50px; background: var(--main-blue); color: white;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 700; margin: 0 auto 1rem;
+    }
+    .step-card h3 { margin-bottom: 0.5rem; }
+    .step-card code {
+      display: inline-block; background: #1e293b; color: #f8fafc;
+      padding: 0.3rem 0.6rem; border-radius: 6px; font-size: 0.85rem; margin-top: 0.5rem;
+    }
+    /* 下载 / 立即使用区 */
+    .download-box {
+      background: linear-gradient(135deg, var(--main-blue) 0%, var(--dark-blue) 100%);
+      color: white; border-radius: var(--radius); padding: 3rem 2rem; text-align: center;
+    }
+    .download-box h2 { font-size: 2rem; margin-bottom: 1rem; }
+    .download-box p { opacity: 0.9; margin-bottom: 2rem; }
+    .install-code {
+      background: rgba(0,0,0,0.25); color: #f8fafc; font-family: "Consolas", monospace;
+      padding: 1rem 1.5rem; border-radius: 8px; display: inline-block;
+      text-align: left; margin: 0.5rem 0; font-size: 0.95rem;
+    }
+    .download-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 1.5rem; }
+    .download-links a {
+      background: white; color: var(--main-blue); text-decoration: none;
+      padding: 0.8rem 1.8rem; border-radius: 50px; font-weight: 600; transition: 0.3s;
+    }
+    .download-links a:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    /* 页脚 */
+    footer {
+      background: #1e293b; color: white; padding: 3rem 2rem;
+      text-align: center; margin-top: 5rem;
+    }
+    footer a { color: #93c5fd; text-decoration: none; }
+    /* 响应式适配 */
+    @media (max-width: 768px) {
+      .nav-actions a { display: none; }
+      .demo-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 固定导航栏 -->
+  <nav>
+    <div class="logo">📄 mdtoolkit</div>
+    <div class="nav-actions">
+      <a href="#features">核心功能</a>
+      <a href="#demo">在线体验</a>
+      <a href="#steps">使用教程</a>
+      <a href="#download" class="primary-btn">立即使用</a>
+    </div>
+  </nav>
+
+  <!-- 首屏宣传区 -->
+  <div class="hero">
+    <h1>Markdown 文档一键处理工具</h1>
+    <p>自动生成目录、修复坏链接、一键排版、导出网页。<br>完全不用学命令，点一下就搞定。</p>
+    <div class="hero-btn-group">
+      <a href="#demo" class="big-btn btn-blue">🖱️ 立即在线体验</a>
+      <a href="#download" class="big-btn btn-white">📥 免费下载</a>
+    </div>
+  </div>
+
+  <!-- 痛点场景区 -->
+  <section>
+    <h2 class="section-title">你是不是经常遇到这些麻烦事？</h2>
+    <div class="pain-points">
+      <div class="pain-card">
+        <h3>手动写文档目录太累</h3>
+        <p>写完大段文档后要数标题、调编号，改一处全文档目录都要手动改，改到崩溃还容易错。</p>
+      </div>
+      <div class="pain-card">
+        <h3>链接点不开没人发现</h3>
+        <p>分享给别人的文档里藏着一堆过期链接，别人点了打不开，以为你做的内容很不专业。</p>
+      </div>
+      <div class="pain-card">
+        <h3>格式乱得像草稿纸</h3>
+        <p>一段文档里列表样式前后不一致，标题该空的地方没空，别人看了一眼就嫌乱不想读。</p>
+      </div>
+      <div class="pain-card">
+        <h3>想分享文档传不出去</h3>
+        <p>辛辛苦苦写好 Markdown，想发给不会用编辑器的朋友看，却不知道怎么快速转成网页分享。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 核心功能区 -->
+  <section id="features">
+    <h2 class="section-title">4大核心功能，一次解决所有问题</h2>
+    <div class="features">
+      <div class="feature-card">
+        <div class="feature-icon">📋</div>
+        <h3>自动生成目录</h3>
+        <p>上传你的 Markdown 文件，几秒钟就能生成带跳转链接的智能目录，再也不用手动敲行号和锚点。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <h3>链接一键检测</h3>
+        <p>自动扫描文档里所有网址，哪些是正常的，哪些已经失效，一目了然。彻底告别"死链接"尴尬。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✨</div>
+        <h3>智能排版美化</h3>
+        <p>一键统一全文格式：标题后自动补空格、列表符号整齐、多余空行自动压缩，排版瞬间高级。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3>导出网页分享</h3>
+        <p>把你的 Markdown 文档直接变成标准网页，打开链接就能看，不用对方装任何软件。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 在线体验区 -->
+  <section id="demo">
+    <h2 class="section-title">不用下载，现在就能在线体验</h2>
+    <div class="demo-container">
+      <div class="demo-row">
+        <div class="demo-box">
+          <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">在这里输入你的 Markdown 内容：</label>
+          <textarea id="demo-input" placeholder="把你的文档粘贴进来试试效果..."># 我的旅行日记
+
+## 第一章 出发准备
+* 买好车票
++ 收拾行李
+
+## 第二章 旅途风景
+- 爬山看日出
+- 海边拍照片
+
+这是一篇[旅行游记](https://example.com/travel)，欢迎阅读。
+参考[本地文档](./notfound.md)。</textarea>
+        </div>
+        <div class="demo-box">
+          <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">处理结果实时展示：</label>
+          <div class="demo-output-box">
+            <pre id="demo-output">点击下方功能按钮，立刻看到处理效果...</pre>
+          </div>
+        </div>
+      </div>
+      <div class="demo-buttons">
+        <button class="demo-btn" id="btn-toc">📋 一键生成目录</button>
+        <button class="demo-btn" id="btn-format">✨ 智能排版美化</button>
+        <button class="demo-btn" id="btn-export">🌐 导出网页</button>
+        <button class="demo-btn" id="btn-linkcheck">🔗 链接检测</button>
+      </div>
+      <div class="demo-status">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">正在检测本地 mdtoolkit 服务…</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 使用步骤 -->
+  <section id="steps">
+    <h2 class="section-title">三步上手，命令行同样简单</h2>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h3>安装</h3>
+        <p>用 pip 一条命令装好工具箱</p>
+        <code>pip install mdtoolkit</code>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h3>选功能</h3>
+        <p>目录 / 检查 / 排版 / 导出，按需调用</p>
+        <code>mdkit toc README.md</code>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h3>出结果</h3>
+        <p>加 -w 写回文件，或 -o 指定导出路径</p>
+        <code>mdkit export post.md -o post.html</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- 下载 / 立即使用区 -->
+  <section id="download">
+    <div class="download-box">
+      <h2>现在就把它装进你的电脑</h2>
+      <p>开源免费，MIT 许可证。命令行党用 pip，图形党用上面的在线体验。</p>
+      <div class="install-code">$ pip install mdtoolkit</div>
+      <div class="download-links">
+        <a href="https://github.com/BISTU-OSSD/mdtoolkit" target="_blank" rel="noopener">⭐ GitHub 仓库</a>
+        <a href="https://pypi.org/project/mdtoolkit/" target="_blank" rel="noopener">📦 PyPI 页面</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 页脚 -->
+  <footer>
+    <p>📄 mdtoolkit —— 一个 Markdown 命令行工具箱</p>
+    <p style="margin-top:0.5rem;opacity:0.7;">
+      开源于 <a href="https://github.com/BISTU-OSSD/mdtoolkit" target="_blank" rel="noopener">BISTU-OSSD/mdtoolkit</a> · MIT License
+    </p>
+  </footer>
+
+  <script>
+  /* ============================================================
+     mdtoolkit 在线体验
+     两种运行模式：
+       1) 后端在线：fetch 调用本地 Flask 服务（web_api.py），
+          执行的是 mdtoolkit 包里真实的 Python 代码。
+       2) 后端离线：用下面的 JS 版本兜底，逻辑与 Python 模块一一对应，
+          保证网页在纯静态托管（如 GitHub Pages）时也能演示。
+     ============================================================ */
+
+  // 后端地址：网页由 web_api.py 同源托管时用相对路径(空字符串)；
+  // 直接双击 html 文件(file://)时 fetch 会失败,自动回退纯前端模式。
+  const API_BASE = "";
+  let backendOnline = false;
+
+  // ---------- 纯前端复现：对应 mdtoolkit/toc.py ----------
+  function slugify(text) {
+    text = text.trim().toLowerCase();
+    // 保留字母数字下划线、中文、连字符、空格；其余删除
+    text = text.replace(/[^\w\u4e00-\u9fff\- ]/g, "");
+    return text.replace(/ /g, "-");
+  }
+  const RE_HEADING = /^(#{1,6})\s+(.*?)\s*#*\s*$/;
+  const RE_FENCE = /^\s*(```|~~~)/;
+
+  function extractHeadings(lines, minLevel, maxLevel) {
+    const headings = [];
+    let inFence = false;
+    for (const line of lines) {
+      if (RE_FENCE.test(line)) { inFence = !inFence; continue; }
+      if (inFence) continue;
+      const m = line.match(RE_HEADING);
+      if (!m) continue;
+      const level = m[1].length;
+      if (level < minLevel || level > maxLevel) continue;
+      const title = m[2].trim();
+      headings.push([level, title, slugify(title)]);
+    }
+    return headings;
+  }
+  function buildToc(headings) {
+    if (!headings.length) return "";
+    const base = Math.min(...headings.map(h => h[0]));
+    return headings.map(([level, title, slug]) =>
+      "  ".repeat(level - base) + `- [${title}](#${slug})`
+    ).join("\n");
+  }
+  function jsToc(text) {
+    const headings = extractHeadings(text.split("\n"), 1, 3);
+    if (!headings.length) return "未找到符合级别范围的标题。";
+    return buildToc(headings);
+  }
+
+  // ---------- 纯前端复现：对应 mdtoolkit/format.py ----------
+  const RE_FMT_HEADING = /^(#{1,6})\s*(.*?)\s*$/;
+  const RE_ULIST = /^(\s*)[*+]\s+(.*)$/;
+  function jsFormat(text) {
+    let out = [], inFence = false;
+    for (let line of text.split("\n")) {
+      if (RE_FENCE.test(line)) { inFence = !inFence; out.push(line.replace(/\s+$/, "")); continue; }
+      if (inFence) { out.push(line); continue; }
+      if (line.trimStart().startsWith("#")) {
+        const m = line.match(RE_FMT_HEADING);
+        if (m) line = `${m[1]} ${m[2]}`;
+      }
+      const mu = line.match(RE_ULIST);
+      if (mu) line = `${mu[1]}- ${mu[2]}`;
+      out.push(line.replace(/\s+$/, ""));
+    }
+    let collapsed = [], blank = false;
+    for (const line of out) {
+      if (line === "") { if (blank) continue; blank = true; }
+      else blank = false;
+      collapsed.push(line);
+    }
+    return collapsed.join("\n") + "\n";
+  }
+
+  // ---------- 纯前端复现：对应 mdtoolkit/export.py ----------
+  const RE_EXP_HEADING = /^(#{1,6})\s+(.*)$/;
+  const RE_EXP_ULIST = /^\s*[-*+]\s+(.*)$/;
+  const RE_LINK = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const RE_CODE = /`([^`]+)`/g;
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+  }
+  function inlineMd(text) {
+    text = escapeHtml(text);
+    text = text.replace(RE_LINK, '<a href="$2">$1</a>');
+    text = text.replace(RE_CODE, "<code>$1</code>");
+    return text;
+  }
+  function jsExport(text) {
+    let out = [], inFence = false, inList = false;
+    for (const line of text.split("\n")) {
+      if (RE_FENCE.test(line)) {
+        if (inFence) { out.push("</code></pre>"); inFence = false; }
+        else { if (inList) { out.push("</ul>"); inList = false; } out.push("<pre><code>"); inFence = true; }
+        continue;
+      }
+      if (inFence) { out.push(escapeHtml(line)); continue; }
+      let m = line.match(RE_EXP_HEADING);
+      if (m) {
+        if (inList) { out.push("</ul>"); inList = false; }
+        const lv = m[1].length;
+        out.push(`<h${lv}>${inlineMd(m[2])}</h${lv}>`); continue;
+      }
+      m = line.match(RE_EXP_ULIST);
+      if (m) {
+        if (!inList) { out.push("<ul>"); inList = true; }
+        out.push(`<li>${inlineMd(m[1])}</li>`); continue;
+      }
+      if (inList) { out.push("</ul>"); inList = false; }
+      if (line.trim() === "") continue;
+      out.push(`<p>${inlineMd(line)}</p>`);
+    }
+    if (inList) out.push("</ul>");
+    const body = out.join("\n");
+    return `<!DOCTYPE html>\n<html lang="zh">\n<head>\n<meta charset="utf-8">\n<title>预览</title>\n</head>\n<body>\n${body}\n</body>\n</html>\n`;
+  }
+
+  // ---------- 链接提取：对应 mdtoolkit/linkcheck.py ----------
+  // 浏览器有跨域限制，前端只能列出链接、无法真正探测可达性；
+  // 真实的 HTTP 可达性检测由后端 Python 完成。
+  const RE_LC_LINK = /\[[^\]]*\]\(([^)]+)\)/g;
+  function jsLinkExtract(text) {
+    const lines = text.split("\n");
+    let inFence = false, results = [];
+    lines.forEach((line, i) => {
+      if (RE_FENCE.test(line)) { inFence = !inFence; return; }
+      if (inFence) return;
+      let m;
+      RE_LC_LINK.lastIndex = 0;
+      while ((m = RE_LC_LINK.exec(line)) !== null) {
+        const target = m[1].trim().split(/\s+/)[0];
+        results.push([i + 1, target]);
+      }
+    });
+    if (!results.length) return "文档里没有找到链接。";
+    let lines2 = ["【纯前端模式】只能列出链接，无法检测可达性。", "启动本地服务后可做真实 HTTP 探测：", ""];
+    for (const [ln, t] of results) lines2.push(`第 ${ln} 行: ${t}`);
+    return lines2.join("\n");
+  }
+  // ---------- 后端探测 + 状态显示 ----------
+  const $ = id => document.getElementById(id);
+  function setStatus(state, text) {
+    const dot = $("status-dot"), txt = $("status-text");
+    dot.className = "status-dot" + (state ? " " + state : "");
+    txt.textContent = text;
+  }
+  async function probeBackend() {
+    try {
+      const r = await fetch(API_BASE + "/api/health", { method: "GET" });
+      if (r.ok) {
+        backendOnline = true;
+        setStatus("online", "已连接本地 mdtoolkit 服务，运行的是真实 Python 代码 ✓");
+        return;
+      }
+    } catch (e) { /* 后端未启动 */ }
+    backendOnline = false;
+    setStatus("offline", "后端未启动，当前为纯前端演示模式（逻辑与 Python 一致）。启动 python web_api.py 可调用真实代码。");
+  }
+
+  // ---------- 统一调用：优先后端，失败回退前端 ----------
+  async function callBackend(command, text) {
+    const r = await fetch(API_BASE + "/api/" + command, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return (await r.json()).result;
+  }
+  async function run(command, jsFallback) {
+    const text = $("demo-input").value;
+    const out = $("demo-output");
+    if (backendOnline) {
+      out.textContent = "⏳ 正在调用后端 Python…";
+      try {
+        out.textContent = await callBackend(command, text);
+        return;
+      } catch (e) {
+        backendOnline = false;
+        setStatus("offline", "后端连接中断，已切回纯前端模式。");
+      }
+    }
+    out.textContent = jsFallback(text);
+  }
+
+  // ---------- 按钮绑定 ----------
+  $("btn-toc").addEventListener("click", () => run("toc", jsToc));
+  $("btn-format").addEventListener("click", () => run("format", jsFormat));
+  $("btn-export").addEventListener("click", () => run("export", jsExport));
+  $("btn-linkcheck").addEventListener("click", () => run("linkcheck", jsLinkExtract));
+
+  probeBackend();
+  </script>
+</body>
+</html>

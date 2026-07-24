@@ -1,24 +1,38 @@
 @echo off
-chcp 65001 >nul
-title mdtoolkit 在线体验
+title mdtoolkit web demo
 
 echo ============================================
-echo   mdtoolkit 网页版启动中，请稍候...
+echo   Starting mdtoolkit web demo, please wait...
 echo ============================================
 echo.
 
 cd /d "%~dp0"
 
-REM 检查 flask 是否已安装，没装就自动安装
-python -c "import flask" 2>nul
+REM Check python exists
+python --version >nul 2>&1
 if errorlevel 1 (
-    echo 首次运行，正在安装依赖 flask，请稍候...
-    python -m pip install flask
-    echo.
+    echo [ERROR] Python not found. Please install Python first: https://www.python.org/downloads/
+    echo Remember to check "Add Python to PATH" during install.
+    pause
+    exit /b 1
 )
 
-echo 正在启动服务，浏览器马上自动打开。
-echo 用完直接关闭这个黑窗口即可停止。
+REM Check flask; install if missing
+python -c "import flask" >nul 2>&1
+if errorlevel 1 (
+    echo First run: installing dependency "flask", please wait...
+    python -m pip install flask
+    echo.
+    python -c "import flask" >nul 2>&1
+    if errorlevel 1 (
+        echo [ERROR] Failed to install flask. Please run manually:  pip install flask
+        pause
+        exit /b 1
+    )
+)
+
+echo Starting server, browser will open automatically.
+echo Close this window to stop the server.
 echo.
 
 python web_api.py
